@@ -1,2 +1,832 @@
 Azure Notes
 ****************************
+
+Created free Azure account on portal.azure.com
+sheerish.phatangare@gmail.com
+nebula!23
+
+
+Install Azure CLI - https://docs.microsoft.com/en-us/cli/azure/install-azure-cli
+
+Azure CLI commnads
+
+az --version OR 
+az version
+
+az login
+The default web browser has been opened at https://login.microsoftonline.com/common/oauth2/authorize. Please continue the login in the web browser. If no web browser is available or if the web browser fails to open, use device code flow with `az login --use-device-code`.
+
+az logout
+
+az help
+
+----------------------------------------------------
+
+Azure Web App Maven Plugin (Azure CLI is not required for this step)
+
+1) Add below plugin in pom.xml of the Spring boot project
+
+<!-- Azure Web App Maven Plugin in pom.xml -->
+			
+<plugin>
+	<groupId>com.microsoft.azure</groupId>
+	<artifactId>azure-webapp-maven-plugin</artifactId>
+	<version>1.7.0</version>
+</plugin>
+
+
+2) Maven goal to configure Azure Web App Maven Plugin
+
+cd to project directory and run Maven goal to configure Azure Web App Maven Plugin
+mvn azure-webapp:config
+
+Select appropriate options as below - 
+
+[WARNING] The plugin may not work if you change the os of an existing webapp.
+Define value for OS(Default: Linux):
+1. linux [*]
+2. windows
+3. docker
+Enter index to use: 2
+
+Define value for javaVersion(Default: 1.8):
+1. 1.7
+2. 1.7.0_191_ZULU
+3. 1.7.0_51
+4. 1.7.0_71
+5. 1.7.0_80
+6. 1.8 [*]
+7. 1.8.0_102
+8. 1.8.0_111
+9. 1.8.0_144
+10. 1.8.0_172
+11. 1.8.0_172_ZULU
+12. 1.8.0_181
+13. 1.8.0_181_ZULU
+14. 1.8.0_202
+15. 1.8.0_202_ZULU
+16. 1.8.0_25
+17. 1.8.0_60
+18. 1.8.0_73
+19. 1.8.0_92
+20. 11
+21. 11.0.2_ZULU
+Enter index to use:
+
+Please confirm webapp properties
+AppName : hello-world-rest-api-1608946687566
+ResourceGroup : hello-world-rest-api-1608946687566-rg
+Region : westeurope
+PricingTier : PremiumV2_P1v2
+OS : Windows
+Java : 1.8
+WebContainer : tomcat 8.5
+Deploy to slot : false
+Confirm (Y/N)? : y
+
+This step will add <configuration> section for the Azure Web App Maven Plugin in pom.xml
+If above maven goal is run in the Eclipse, all default options are auto-chosen. Unlike command line, no options are given to the user. 
+
+Question - Why WebContainer - tomcat 8.5 required for a Spring boot application with embedded container. Can we skip it?
+
+----------------------------------------------------
+
+Deploy Spring Boot Application to Azure (Azure CLI and Azure login are required for this step)
+
+Even inside Eclipse it will give below messages -- 
+
+[INFO] Authenticate with Azure CLI 2.0
+Please login in Azure CLI and press any key to continue after you've successfully logged in.
+
+az login
+mvn azure-webapp:deploy - build Spring boot application and deploy to Azure
+
+Note - Remember to execute mvn package OR mvn clean install before deployment. project target folder should have updated jar to be deployed.
+
+When web app is deployed for the first time, below steps are performed --
+
+[INFO] Authenticate with Azure CLI 2.0
+[INFO] Target Web App doesn't exist. Creating a new one...
+[INFO] Creating App Service Plan 'ServicePlana74bea41-9d06-4a89'...
+[INFO] Successfully created App Service Plan.
+[INFO] Successfully created Web App.
+[INFO] Using 'UTF-8' encoding to copy filtered resources.
+[INFO] Copying 1 resource to c:\git-repos\Azure_Projects\hello-world-rest-api\target\azure-webapp\hello-world-rest-api-shirish-1806
+[INFO] Trying to deploy artifact to hello-world-rest-api-shirish-1806...
+[INFO] Generating web.config for Web App on Windows.
+[INFO] Deploying the zip package hello-world-rest-api-shirish-1806.zip...
+[INFO] Successfully deployed the artifact to https://hello-world-rest-api-shirish-1806.azurewebsites.net
+
+Normally our appliation runs on local as below 
+
+http://localhost:8080/hello-world
+Hello World
+
+http://localhost:8080/hello-world-bean
+{"message":"Hello World"}
+
+http://localhost:8080/hello-world/path-variable/in28minutes
+{"message":"Hello World, in28minutes"}
+
+To run a Azure Cloud deployed app just replace http://localhost:8080 with https://hello-world-rest-api-shirish-1806.azurewebsites.net
+
+https://hello-world-rest-api-shirish-1806.azurewebsites.net/hello-world
+Hello World
+
+https://hello-world-rest-api-shirish-1806.azurewebsites.net/hello-world-bean
+{"message":"Hello World"}
+
+https://hello-world-rest-api-shirish-1806.azurewebsites.net/hello-world/path-variable/in28minutes
+{"message":"Hello World, in28minutes"}
+
+Now our simple spring Boot REST application(.jar) is succesfully deployed on Azure. Similarly a spring Boot Web Application (.war) can be deployed to Azure.
+
+Go to - https://portal.azure.com/ and checkout details about deployed app
+
+Make some changes to appliaction and try Deploying new version - All steps remain same as above
+
+Enable Log streams in App Service logs settings and observe logs.
+
+----------------------------------------------------
+
+Review Log Streams and Tail Web App Logs using Azure CLI
+
+Another option to check logs is Advanced tools - Kudu console
+
+Azure CLI command to Review Log Streams and Tail (Terminate with Cntrl-C)
+
+az webapp log tail --name hello-world-rest-api-shirish-1806 --resource-group hello-world-rest-api-rg
+
+In summary 3 ways to check live stream logs for Azure deployed application
+1) Azure Web portal - Enable Log streams in App Service logs settings and observe logs.
+2) Azure Web portal - Advanced tools - Kudu console - Live Streaming
+3) Azure CLI - Use Azure CLI command to Review Log Streams and Tail
+
+----------------------------------------------------
+
+AZure virtual machine was created with below details (This step was done to avoid installing Docker desktop on windows machine)
+This Azure standard B1 VM with Linux (ubuntu 18.04) OS will be used to install Docker engine.
+
+Virtual machine name - shirish-1806
+username - azureuser
+SSH key pair name - shirish-1806
+
+
+With SSH private/public key type of authentication, username and passwords are not required.
+
+ssh -i <Path to private key location> azureuser@13.68.139.52
+
+ssh -i C:/Azure_VM_private_key/shirish-1806.pem azureuser@13.68.139.52
+
+OR 
+
+Store private key in default location - C:\Users\Shirish\.ssh on windows and use below command
+
+ssh azureuser@13.68.139.52
+
+To use above command, the private key you're using should have the default name (id_rsa), and should be stored in the default path (C:\Users\Shirish\.ssh).
+
+----------------------------------------------------
+
+Installing Docker on Azure VM created in above step
+Follow steps on url - https://docs.docker.com/engine/install/ubuntu/ and install Docker engine using "Install using the repository" option
+Docker Engine is installed and running. The docker group is created but no users are added to it. You need to use sudo to run Docker commands.
+like - sudo docker version
+
+To upgrade Docker Engine, first run sudo apt-get update. Yo can also choose the new version you want to install.
+
+----------------------------------------------------
+
+Running MySQL as Docker Container on Azure VM - How to install Mysql on Azure VM using docker image
+Instead of using traditional approach of installing Mysql on local/Azure VM, as a modern developer we can use docker Mysql docker image.
+
+https://hub.docker.com/_/mysql
+
+Launching MySQL using Docker
+
+docker pull <image name> - This command is used to pull images from the docker repository(hub.docker.com)
+docker pull mysql
+
+docker run mysql:5.7 - Pull + run mysql docker image on local
+
+azureuser@shirish-1806:~$ sudo docker run mysql:5.7
+Unable to find image 'mysql:5.7' locally
+5.7: Pulling from library/mysql
+6ec7b7d162b2: Pull complete
+fedd960d3481: Pull complete
+7ab947313861: Pull complete
+64f92f19e638: Pull complete
+3e80b17bff96: Pull complete
+014e976799f9: Pull complete
+59ae84fee1b3: Pull complete
+7d1da2a18e2e: Pull complete
+301a28b700b9: Pull complete
+529dc8dbeaf3: Pull complete
+bc9d021dc13f: Pull complete
+Digest: sha256:c3a567d3e3ad8b05dfce401ed08f0f6bf3f3b64cc17694979d5f2e5d78e10173
+Status: Downloaded newer image for mysql:5.7
+2020-12-26 17:49:18+00:00 [Note] [Entrypoint]: Entrypoint script for MySQL Server 5.7.32-1debian10 started.
+2020-12-26 17:49:18+00:00 [Note] [Entrypoint]: Switching to dedicated user 'mysql'
+2020-12-26 17:49:18+00:00 [Note] [Entrypoint]: Entrypoint script for MySQL Server 5.7.32-1debian10 started.
+2020-12-26 17:49:18+00:00 [ERROR] [Entrypoint]: Database is uninitialized and password option is not specified
+        You need to specify one of MYSQL_ROOT_PASSWORD, MYSQL_ALLOW_EMPTY_PASSWORD and MYSQL_RANDOM_ROOT_PASSWORD
+
+
+Specify required Env variables and initialize database with below command --
+
+docker run --detach --env MYSQL_ROOT_PASSWORD=dummypassword --env MYSQL_USER=todos-user --env MYSQL_PASSWORD=dummytodos --env MYSQL_DATABASE=todos --name mysql --publish 3306:3306 mysql:5.7
+
+OR 
+
+docker run -d -e MYSQL_ROOT_PASSWORD=dummypassword -e MYSQL_USER=todos-user -e MYSQL_PASSWORD=dummytodos -e MYSQL_DATABASE=todos -n mysql -p 3306:3306 mysql:5.7
+
+----------------------------------------------------
+
+Test My SQL Db instance on Azure VM
+
+Install My SQL Shell Client on Azure VM - https://dev.mysql.com/downloads/shell/
+Download .deb file for respective OS from above link - 
+Install it using below command
+sudo dpkg -i /home/azureuser/deb_files/mysql-shell_8.0.22-1ubuntu18.04_amd64.deb
+
+Run it using command mysqlsh
+
+azureuser@shirish-1806:~/deb_files$ mysqlsh
+MySQL Shell 8.0.22
+
+Copyright (c) 2016, 2020, Oracle and/or its affiliates.
+Oracle is a registered trademark of Oracle Corporation and/or its affiliates.
+Other names may be trademarks of their respective owners.
+
+Type '\help' or '\?' for help; '\quit' to exit.
+ MySQL  JS >
+
+Connect to mysql instance running on Azure VM
+
+ MySQL  JS > \connect todos-user@13.68.139.52:3306
+Creating a session to 'todos-user@13.68.139.52:3306'
+Please provide the password for 'todos-user@13.68.139.52:3306': **********
+MySQL Error 2003 (HY000): Can't connect to MySQL server on '13.68.139.52' (110)
+ MySQL  JS > \connect todos-user@13.68.139.52:3306
+Creating a session to 'todos-user@13.68.139.52:3306'
+Please provide the password for 'todos-user@13.68.139.52:3306': **********
+Fetching schema names for autocompletion... Press ^C to stop.
+Your MySQL connection id is 3
+Server version: 5.7.32 MySQL Community Server (GPL)
+No default schema selected; type \use <schema> to set one.
+ MySQL  13.68.139.52:3306 ssl  JS >
+ MySQL  localhost:3306 ssl  JS > \sql
+Switching to SQL mode... Commands end with ;
+
+ MySQL  localhost:3306 ssl  SQL > use todos
+Default schema set to `todos`.
+Fetching table and column names from `todos` for auto-completion... Press ^C to stop.
+
+Note- Added inbound port rule for port 3306 in Azure VM and then connection was successful
+
+Now able to connect to Azure mysql instance and execute SQL queries. 
+
+MySQL  13.68.139.52:3306 ssl  todos  SQL > create table todo (id integer not null, description varchar(255), is_done bit not null, target_date datetime(6), username varchar(255), primary key (id)) engine=InnoDB;
+
+MySQL  13.68.139.52:3306 ssl  todos  SQL > insert into todo values ( 1, 'Default description', 0, '2019-06-26', 'in28minutes');
+
+ MySQL  13.68.139.52:3306 ssl  todos  SQL > select * from todo;
++----+---------------------+---------+----------------------------+--------------+
+| id | description         | is_done | target_date                | username    |
++----+---------------------+---------+----------------------------+--------------+
+|  1 | Default description | 0       | 2019-06-26 00:00:00.000000 | in28minutes |
++----+---------------------+---------+----------------------------+--------------+
+1 row in set (0.0024 sec)
+
+
+----------------------------------------------------
+
+Run front end todo application with Spring rest backend
+
+1) Front-end todo application is a React Js application 
+2) npm is required to install and run it
+3) npm is like maven. It manages dependencies of a react application.
+4) Dependencies for react application are define in package.json
+5) npm install will download all the dependecies for the front end react application
+6) Cd to todo-app project folder and run npm install
+7) Execute npm start command to start react application on configured server and port.
+
+c:\git-repos\Azure_Projects\spring-boot-React-full-stack\todo-app>npm start
+
+> todo-app@0.1.0 start c:\git-repos\Azure_Projects\spring-boot-React-full-stack\todo-app
+> SET PORT=4200 && react-scripts start
+
+Login to application - in28minutes - password!23
+
+----------------------------------------------------
+
+Spring rest backend (restful-web-services) is configured to used in-memory H2 database.
+Change configuration to use mysql DB installed on Azure VM. Keep H2 configuration for testing only --
+
+pom.xml
+
+<dependency>
+	<groupId>com.h2database</groupId>
+	<artifactId>h2</artifactId>
+	<scope>test</scope>
+</dependency>
+<dependency>
+	<groupId>mysql</groupId>
+	<artifactId>mysql-connector-java</artifactId>
+</dependency>
+
+
+src/main/resources/application.properties
+
+spring.jpa.hibernate.ddl-auto=update
+spring.datasource.driver-class-name=com.mysql.cj.jdbc.Driver
+spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.MySQL55Dialect
+spring.datasource.url=jdbc:mysql://localhost:3306/todos
+spring.datasource.username=todos-user
+spring.datasource.password=dummytodos
+
+src/test/resources/application.properties
+
+spring.jpa.hibernate.ddl-auto=create-drop
+spring.datasource.driver-class-name=org.h2.Driver
+spring.datasource.url=jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1
+spring.datasource.username=sa
+spring.datasource.password=sa
+
+----------------------------------------------------
+
+Deploy Java REST API Backend using Azure App Service and connect from local front end 
+
+Make below change in constants.js
+
+/* Point to REST API deployed on Azure Cloud */	
+export const API_URL = 'https://restful-web-services-shirish.azurewebsites.net'
+
+Note - I observed that when Linux/Java 11 combination was selected to deploy REST API to Azure, there were intermittent connectivity issues.
+These issues were solved when I redeployed REST API with windows/Java8 combination. 
+
+----------------------------------------------------
+
+Deploy React Frontend using Azure App Service and connect to Java REST API Backend deployed on Azure cloud
+
+To create an optimized production build, use - npm run build
+
+npm run build - will package front end application in a 'build' folder which can be deployed to Azure.
+
+cd to build folder and deploy a static html web application on Azure as below -
+ 
+az webapp up --name frontend-react-app-shirish --plan ServicePlanb7fe9b51-276f-4fb3 --resource-group frontend-react-rg --os-type Windows --location westeurope --html
+
+--html - deploy as a static html webapp. Without this option you will get below error - 
+
+Could not auto-detect the runtime stack of your app.
+HINT: Are you in the right folder?
+For more information, see 'https://go.microsoft.com/fwlink/?linkid=2109470'
+
+Tried to launch whole application as node|10.6 runtime instead of build folder, but it did not work.
+
+Use `az webapp list-runtimes` for available list of runtimes.
+
+az webapp up --name frontend-react-app-shirish --plan ServicePlanb7fe9b51-276f-4fb3 --resource-group frontend-react-rg --os-type Windows --location westeurope --runtime "node|10.6"
+
+You can launch the app at http://frontend-react-app-shirish.azurewebsites.net
+
+Using same service plan but different resource group
+
+To restart html webapp - 
+
+az webapp restart --name frontend-react-app-shirish --resource-group frontend-react-rg
+
+Note: For Cors errors updated @CrossOrigin(origins="*") in all REST controllers. This is controller-level CORS configuration.
+
+Now backend REST API works from both clients - 1) http://localhost:4200 and https://frontend-react-app-shirish.azurewebsites.net
+Backend REST application - https://restful-web-services-shirish.azurewebsites.net is connected to mysql DB installed on Azure VM.
+
+----------------------------------------------------
+Creating MySQL Database in Azure - Azure Database for Mysql servers is a managed service
+
+Created MySQL Database in Azure with below details - 
+
+Resource group - database-mysql-shirish-1806
+Server name - todoserver-shirish-1806
+Server admin login name - shirish1806
+admin password - dummypassword!23
+
+
+REST API backend application.propeties was updated as shown below to use env vars instead of hardcoded values. 
+
+# Connect to Mysql installed on Azure VM
+#spring.datasource.url=jdbc:mysql://13.68.139.52:3306/todos
+#spring.datasource.username=todos-user
+#spring.datasource.password=dummytodos
+
+# Modifying above hardcoded properties to use Environment variables so that application can be connected to Azure Database for Mysql 
+# ${ENV_VAR:default-value} - Use default-value if ENV_VAR is not defined
+spring.datasource.url=jdbc:mysql://${RDS_HOSTNAME:13.68.139.52}:${RDS_PORT:3306}/${RDS_DB_NAME:todos}
+spring.datasource.username=${RDS_USERNAME:todos-user}
+spring.datasource.password=${RDS_PASSWORD:dummytodos}
+
+We can define above env vars for Azure Mysql DB service and connect our App to it.
+
+RDS_HOSTNAME - todoserver-shirish-1806.mysql.database.azure.com
+RDS_DB_NAME - todos
+RDS_PORT - 3306
+RDS_USERNAME - shirish1806@todoserver-shirish-1806
+RDS_PASSWORD - dummypassword!23
+
+Configure above env vars in App-Service (restful-web-services-shirish) --> Configuration --> Application settings
+
+save and restart App-Service (restful-web-services-shirish)
+
+To restart backend REST API (restful-web-services-shirish)
+az webapp restart --name restful-web-services-shirish --resource-group restful-web-services-rg
+
+Check log stream using - 
+az webapp log tail --name restful-web-services-shirish --resource-group restful-web-services-rg
+
+
+When application is restarted, you will get SQLException becuase client IP is not allowed to access Azure Mysql DB.
+Change below setting to - Yes
+
+Azure DB to MySQL (todoserver-shirish-1806) -- Connection security -- Allow access to Azure services -- Yes
+Need to create database todos in Azure DB to MySQL (todoserver-shirish-1806)
+
+Using Azure Cloud Shell to Create Database todos in Azure DB to MySQL (todoserver-shirish-1806)
+
+Click on Azure Cloud Shell icon and create storage for it.
+
+Azure Cloud Shell is nothing but a command prompt inside Azure web portal, wherein we can executes Azure CLI commands. 
+Azure Cloud Shell has also got in built mysql shell which we can use to connect to mysql DB.
+
+#Cloud Shell mysql client
+mysql --host todoserver-shirish-1806.mysql.database.azure.com --user shirish1806@todoserver-shirish-1806 -p
+
+If you get error - ERROR 9002 (28000): SSL connection is required. Please specify SSL options and retry.
+Disable below setting for DB and retry
+
+Azure DB to MySQL (todoserver-shirish-1806) -- Connection security -- Enforce SSL connection -- Disable
+
+
+MySQL [(none)]> create database todos;
+Query OK, 1 row affected (0.181 sec)
+
+MySQL [(none)]> show databases;
++--------------------+
+| Database           |
++--------------------+
+| information_schema |
+| mysql              |
+| performance_schema |
+| sys                |
+| todos              |
++--------------------+
+5 rows in set (0.060 sec)
+
+
+After all these congiguration changes restart REST API application.
+
+Note - If you are getting CORS errors in browser as below. 
+
+Access to XMLHttpRequest at 'https://restful-web-services-shirish.azurewebsites.net/authenticate' from origin 'https://frontend-react-app-shirish.azurewebsites.net' has been blocked by CORS policy: Response to preflight request doesn't pass access control check: No 'Access-Control-Allow-Origin' header is present on the requested resource.
+
+az webapp cors add --resource-group restful-web-services-rg --name restful-web-services-shirish --allowed-origins '*'
+
+OR you can use Azure Web portal too - 
+
+restful-web-services-shirish | CORS - Allowed Origins - *
+
+When using Azure portal CORS setting, you can comment out all @CrossOrigin(origins="*") in all REST controllers. Portal settings take precendence.
+
+Even after all above changes got CORS errors repeatedly. Fixed root cause with below setting in application.properties
+
+# TimeZone parameters added to prevent error - The server time zone value 'Coordinated Universal Time' is unrecognized
+spring.datasource.url=jdbc:mysql://${RDS_HOSTNAME:13.68.139.52}:${RDS_PORT:3306}/${RDS_DB_NAME:todos}?useUnicode=true&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=UTC
+
+Connected locally deployed front end and Rest backends to talk to Azure Database for Mysql.
+Need to add Env variables pointing to Azure Database for Mysql in Eclipse Runtime Configuration (RDS_HOSTNAME, RDS_USERNAME, RDS_PASSWORD etc.).
+Need to enable firewall setting for client IP in Azure Portal.
+todoserver-shirish-1806 | Connection security -- Add current Client IP address to Firewall rule
+
+----------------------------------------------------
+
+Try removing Azure portal CORS - Allowed Origins - * setting and instead use global CORS configuration in REST service.
+This was succesfully implemented too :)
+You can combine global- and controller-level CORS configuration.
+
+----------------------------------------------------
+
+Creating Azure MySQL DB from Azure CLI --
+
+az extension add --name db-up
+az mysql up -g in28minutes-database -s todo-web-application-in28minutes-command-line -d todos -u todosuser -p YOUR@PASSWORD1
+
+----------------------------------------------------
+
+Deploying Containerized Java Applications with Azure Web Apps
+
+1) Creating and Running Docker Image for Java Spring Boot REST API
+
+a) Create a dockerfile for Spring boot application. It has instructions to build a docker image for the application.
+b) Configure docker plugin inside pom.xml
+
+Docker image can be created and pushed to docker hub repo in 2 ways - Docker installation is required for both steps
+
+1) Using mvn clean package for a project where docker maven plugin is configured. - build and push goals should be configured in pom.xml
+2) Using docker build / docker push commands -  docker Maven plugin configuration is not required.
+
+docker build -t <path to docker file> - Create a Docker image from DockerFile with specified tags (Repository and Tag)
+docker push <username/image name> - Push an image to the docker hub repository 
+username must match your docker login username
+docker build -t sphatangare/hello-world-rest-api-containarized:0.0.1 . 
+
+Run created docker image locally
+docker run -p 5000:8080 -it -d <image name> - Map container port to hostport -p {Hostport}:{ContainerPort}
+docker run -p 5000:8080 -it -d sphatangare/hello-world-rest-api-containarized:0.0.1
+
+azureuser@shirish-1806:~/hello-world-rest-api-containarized$ curl --noproxy "*" -XGET localhost:5000/hello-world
+Hello World V2
+
+To push docker image you need to first login using docker login
+docker login - username must match your docker login username
+docker push sphatangare/hello-world-rest-api-containarized:0.0.1 
+
+----------------------------------------------------
+
+**Deploying single Container Java Spring Boot REST API Docker Image to Azure**
+
+The docker image created and pushed to docker hub repo can now be deployed to Azure as an App service.
+For this step, we will create resource group, service plan and actual deployment on Azure CLI command prompt.
+
+a) Create Resource Group (Remember to login using az login)
+
+az group create --name container-resource-group --location westeurope
+
+b) Create service plan (VM type - B1 and OS - Linux)
+
+az appservice plan create --name container-service-plan --resource-group container-resource-group --sku B1 --is-linux
+
+c) Deploy docker image directly from docker hub to Azure
+
+az webapp create --resource-group container-resource-group --plan container-service-plan --name hello-world-rest-api-container --deployment-container-image-name sphatangare/hello-world-rest-api-containarized:0.0.1
+
+Now run deployed app service (hello-world-rest-api-container) either on Postman or on a browser
+
+https://hello-world-rest-api-container.azurewebsites.net/hello-world
+Hello World
+
+https://hello-world-rest-api-container.azurewebsites.net/hello-world-bean
+{"message":"Hello World"}
+
+https://hello-world-rest-api-container.azurewebsites.net/hello-world/path-variable/in28minutes
+{"message":"Hello World, in28minutes"}
+
+
+For container app service on Azure portal we can see a new setting - hello-world-rest-api-container | Container settings
+
+hello-world-rest-api-container | Container settings | Continuous Deployment - We can setup continuos deployment of an app service using docker webhooks. As soon as docker image is created and uploaded to the docker hub, it is automatically deployed to Azure.
+
+----------------------------------------------------
+
+**Running Multi Container Java Spring Boot App with MySQL on Local (Without docker-compose) **
+We are using Spring project  - todo-rest-api-mysql
+
+Here on Local means - we are running app service image and mysql image on different containers and linking them together manually on local machine.
+Here we have not deployed these containers on Azure. We are running them with docker commands on local only.
+
+a) Run mysql:5.7 docker image from docker hub (locally)
+
+docker run --detach --env MYSQL_ROOT_PASSWORD=dummypassword --env MYSQL_USER=todos-user --env MYSQL_PASSWORD=dummytodos --env MYSQL_DATABASE=todos --name mysql --publish 3306:3306 mysql:5.7
+
+b) Create docker image and push it to docker hub 
+
+docker build -t sphatangare/todo-rest-api-mysql:1.0.0 .
+
+docker login - username must match your docker login username
+docker push sphatangare/todo-rest-api-mysql:1.0.0 
+
+
+c) Run REST API Container from docker hub - With --link flag we are linking to already running docker image mysql (locally)
+
+docker run --name todos-api --publish 5000:5000 --link mysql:mysql sphatangare/todo-rest-api-mysql:1.0.0
+
+
+Test locally(Azure VM) if both containers talk to each other.
+
+curl --noproxy "*" -XGET  http://localhost:5000/hello-world
+
+curl -d '{
+  "username": "in28minutes",
+  "description": "Learn to Drive a Car",
+  "targetDate": "2030-11-09T10:49:23.566+0000",
+  "done": false
+}' -H 'Content-Type: application/json' http://localhost:5000/jpa/users/in28minutes/todos 
+
+
+curl --noproxy "*" -XGET http://localhost:5000/jpa/users/in28minutes/todos 
+
+----------------------------------------------------
+
+Docker-compose - Compose two containers (mysql and todo rest api) as a single application and deploy to Azure
+Docker-compose is a container orchestration tool.
+
+Installed docker-compose on Azure VM with below commands --
+
+1) sudo curl -L "https://github.com/docker/compose/releases/download/1.27.4/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+
+2) sudo chmod +x /usr/local/bin/docker-compose
+
+----------------------------------------------------
+
+**Running Multi Container Java Spring Boot App with MySQL on Local using Docker-Compose**
+
+1) cd to directory of docker-compose file
+2) docker-compose up will launch both containers as a single unit on local. This command will pull both the images from docker hub and run them as 2 separate containers but as a single multi-container application.
+3) Test locally (Azure VM) if both containers talk to each other.
+
+curl --noproxy "*" -XGET  http://localhost:5000/hello-world
+
+curl -d '{
+  "username": "in28minutes",
+  "description": "Learn to Drive a Car",
+  "targetDate": "2030-11-09T10:49:23.566+0000",
+  "done": false
+}' -H 'Content-Type: application/json' http://localhost:5000/jpa/users/in28minutes/todos 
+
+
+curl --noproxy "*" -XGET http://localhost:5000/jpa/users/in28minutes/todos 
+
+----------------------------------------------------
+
+**Deploying Docker-Compose Java Spring Boot App with MySQL to Azure using Azure CLI **
+
+1) cd to directory of docker-compose file
+
+2) az login
+
+3) az group create --name docker-compose-resource-group --location westeurope
+
+4) az appservice plan create --name docker-compose-service-plan --sku B1 --resource-group docker-compose-resource-group --is-linux 
+
+5) az webapp create --resource-group docker-compose-resource-group --plan docker-compose-service-plan --name todo-rest-api-mysql-docker-compose --multicontainer-config-type compose --multicontainer-config-file docker-compose.yaml
+
+Login to Azure portal and see Container settings - todo-rest-api-mysql-docker-compose | Container settings | Docker Compose (Preview)
+
+6) Now test deployed application on local browser or using curl
+
+
+curl --noproxy "*" -XGET  https://todo-rest-api-mysql-docker-compose.azurewebsites.net/hello-world
+
+curl -d '{
+  "username": "in28minutes",
+  "description": "Learn to Drive a Car",
+  "targetDate": "2030-11-09T10:49:23.566+0000",
+  "done": false
+}' -H 'Content-Type: application/json' https://todo-rest-api-mysql-docker-compose.azurewebsites.net/jpa/users/in28minutes/todos 
+
+
+curl --noproxy "*" -XGET https://todo-rest-api-mysql-docker-compose.azurewebsites.net/jpa/users/in28minutes/todos 
+
+----------------------------------------------------
+
+Azure Cloud Best Practices -- 
+
+On Cloud environments keeping your apps running means MORE COSTS
+Best practices to keep your cost LOW --
+
+a) Periodically check costs of services in Home -- Subscriptions
+b) Set Billing alerts (email-notifications) in Home -- Subscriptions -- Budgets
+c) Periodically delete redundant resource groups
+d) Create resources in region near to users for optimal performance.
+
+
+Deleting created resource group from Azure CLI -- 
+
+az group delete --name docker-compose-resource-group  --yes
+
+----------------------------------------------------
+
+Azure App Service - Creating Auto Scaling Environments
+
+Scale Up - Vertical Scaling - Increasing hardware capacity of an instance. Changing from B1 to P1V2 for instance.
+Scale Down - Decreasing hardware capacity of an instance.
+Scale Out - Horizontal Scaling - Increase no. of instances.
+Scale In - Decrease no. of instances.
+
+B1 is a basic plan with which you can only do manual scaling.
+Manual scaling is defining a fixed no. of instances for an app service and maintaining it.
+
+When scaled up to P1v2, we can perform scaling out with custom-auto-scaling. For auto-scaling, we can define Min/Max/Default instance limits and metric rules. 
+For autoscaling metric rules to work enable/register setting - subscriptions -- Resource Providers -- microsoft insights
+
+Note- We can watch and curl for observation of curl command execution. It can be either be done on local machine or on the Azure cloud shell.
+
+watch -n 0.1 curl https://hello-world-rest-api-v2-in28minutes.azurewebsites.net/hello-world-bean-list
+
+With watch Command, curl will run in fixed intervals of time continuosly (Every 0.1 seconds in above command).
+
+----------------------------------------------------
+
+App service -- Configuration -- General Settings -- Always On - Prevents app from being idled out due to inactivity (with ON setting).
+App service -- Configuration -- General Settings -- ARR(Application Request Routing) Affinity 
+When ARR Affinity is ON - Request is bound to a specific instance for same user/browser requests. Ideal for stateful applications with session management.
+When ARR Affinity is OFF - Request is not bound to a specific instance even for same user/browser requests. Ideal for stateless applications like REST services.
+
+----------------------------------------------------
+
+Creating Deployment Slot for Staging Environment -- 
+
+App service name -- Deployment slots
+Deployment slots are live apps with their own hostnames. App content and configuration elements can be swapped between two deployment slots, including the production slot. This swapping is also called as Blue-Green Deployment i.e. deployment with zero downtime of applications.
+
+A staging slot is created to deploy a new version of application. New changes are tested on stg env with same configuration as that of production. 
+To create a staging env/deployment slot, define below configuration in pom.xml and deploy it.
+
+</runtime>
+	<deploymentSlot>
+		<name>stage</name>
+		<configurationSource>parent</configurationSource>					
+	</deploymentSlot>
+<deployment>
+
+Once deployment for stg is complete, you can see new deployment slot under App service name -- Deployment slots
+You will see '-stg' in application url of stg deployment.
+
+----------------------------------------------------
+
+Swap Stage and Production Environments - Blue Green Deployment - Zero Downtime Deployment
+
+We have App V1 running on production. Now we want to deploy App V2 from stg-prod.
+We have below genral settings under configuration for each App. 
+When Deployment Slot Setting is checked, it is a slot-specific setting and will not be copied over during swapping. However, NEW_SETTING will be copied over to prod. 
+
+PRODUCTION - v1
+DATABASE_URL -> PROD_URL  - Deployment Slot Setting checked
+
+STAGE - V2
+DATABASE_URL -> STAGE_URL  - Deployment Slot Setting checked
+NEW_SETTING - - Deployment Slot Setting Unchecked
+
+You can perform swapping or Blue-Green Deployment with Deployment Slots -- Swap setting.
+This console will show source and target environments with config changes.
+You can also swap with preview before actual swap.
+
+----------------------------------------------------
+
+Canary Deployments with Azure App Service
+
+Instead of complete swap of stg and prod environments, we can keep both envs running at the same time with certain amount of traffic(%).
+This is a Canary Deployment.
+Once we are certain that new slot is working fine, we can move 100% traffic to stg.
+
+Deployment Slots -- Traffic(%)
+
+Note - Make sure unlike Swap, environment variables are same for both the slots for Canary deployment.
+
+----------------------------------------------------
+
+Continuous Deployment for Java Spring Boot Applications with Azure DevOps
+
+Continuous Integration (CI), Continuous Delivery (CD) and Continuos Deployment -- These are different scopes of automation.
+
+Continuous Integration (CI) is about everyone merging code changes to a central repository multiple times a day. Each merge triggers an automated build and testing sequence for the given project.
+
+Continuous Delivery (CD) is a practice of automating the entire software release process. The idea is to do CI, plus automatically prepare and track a release to production. The desired outcome is that anyone with sufficient privileges to deploy a new release can do so at any time in one or a few clicks. The continuous delivery process typically includes at least one manual step of approving and initiating a deploy to production.
+
+Continuous Deployment is a step up from Continuous Delivery in which every change in the source code is deployed to production automatically, without explicit approval from a developer. It is highly automated process with minimal or no manual approvals.
+
+A continuos Integration/Deployment (CI/CD) pipeline can be setup with Github and Azure DevOps so that as soon as new changes are checked in, a new build is deployed to production automatically. 
+
+1) Create a new github repository for a new project named sample_project.
+2) Login to Azure Devops Services (https://azure.microsoft.com/en-us/services/devops/) using same credentials as that of Azure Portal.
+3) Go to https://dev.azure.com/
+4) Create a new Project in Azure Devops say - sample_project
+5) Create a new Service connection with Azure Resource Manager - sample_project -- Settings -- Service Connections -- Azure Resource Manager
+6) Define a Resource Group where application should be deployed.
+7) Create a pipeline for CI/CD in Azure Devops. sample_project -- Pipelines
+8) Enable preview feature - Multi-stage pipeline
+9) Now click "Create Pipeline" - 
+
+a) Connect to Gihub, Select a Github Repo 
+b) Approve and install in Github 
+c) Configure your pipeline (generates azure-pipelines.yml)
+d) Commit azure-pipelines.yml to github repo with Save and Run option in Azure Devops
+e) Review piepline will show build and deploy stages.
+
+Now CI/CD pipeline is setup for project named sample_project. Now with every code check-in a new application build will be created and deployed to Azure automatically.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

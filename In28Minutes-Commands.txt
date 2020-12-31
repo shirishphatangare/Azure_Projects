@@ -1,0 +1,96 @@
+az --version
+az login
+
+mvn azure-webapp:config
+mvn azure-webapp:deploy
+
+az webapp log tail --name hello-world-rest-api-in28minutes --resource-group hello-world-rest-api-rg
+
+docker run --detach --env MYSQL_ROOT_PASSWORD=dummypassword --env MYSQL_USER=todos-user --env MYSQL_PASSWORD=dummytodos --env MYSQL_DATABASE=todos --name mysql --publish 3306:3306 mysql:5.7
+
+az webapp restart --name todo-web-application-mysql-in28minutes --resource-group todo-web-application-mysql-rg
+
+az webapp log tail --name todo-web-application-mysql-in28minute--resource-group todo-web-application-mysql-rg
+
+#Cloud Shell
+mysql --host todo-web-application-in28minutes.mysql.database.azure.com --user todosuser@todo-web-application-in28minutes -p
+
+#MySQLSh
+mysqlsh todo-web-application-in28minutes.mysql.database.azure.com --user todosuser@todo-web-application-in28minutes
+\sql
+use todos;
+select * from todo;
+mysqlsh todo-web-application-in28minutes-command-line.mysql.database.azure.com --user todosuser@todo-web-application-in28minutes-command-line -p
+
+az extension add --name db-up
+
+az mysql up -g in28minutes-database -s todo-web-application-in28minutes-command-line -d todos -u todosuser -p YOUR@PASSWORD1
+
+# Environment Variables
+RDS_HOSTNAME - todo-web-application-in28minutes.mysql.database.azure.com
+todo-web-application-in28minutes-command-line.mysql.database.azure.com
+RDS_PORT   - 3306
+RDS_DB_NAME  - todos
+RDS_USERNAME - todosuser@todo-web-application-in28minutes
+todosuser@todo-web-application-in28minutes-command-line
+RDS_PASSWORD - 
+
+az webapp up --name frontend-full-stack-in28minutes --plan ServicePlan763a680f-840a-4de0 --resource-group rest-api-full-stack-rg --location westeurope
+
+az webapp up --name frontend-full-stack-in28minutes --plan ServicePlan763a680f-840a-4de0 --resource-group rest-api-full-stack-front-end-rg --location westeurope
+
+watch -n 0.1 curl https://hello-world-rest-api-v2-in28minutes.azurewebsites.net/hello-world-bean-list
+
+
+npm install
+npm start
+npm run build
+
+az webapp log tail --name todo-web-application-mysql-in28minutes --resource-group todo-web-application-mysql-rg
+
+
+az group create --name container-resource-group --location westeurope
+az appservice plan create --name container-service-plan --resource-group container-resource-group --sku P1v2 --is-linux
+az webapp create --resource-group container-resource-group --plan container-service-plan --name todo-rest-api-h2-container --deployment-container-image-name in28min/todo-rest-api-h2:1.0.0.RELEASE
+
+
+docker run --detach --env MYSQL_ROOT_PASSWORD=dummypassword --env MYSQL_USER=todos-user --env MYSQL_PASSWORD=dummytodos --env MYSQL_DATABASE=todos --name mysql --publish 3306:3306 mysql:5.7
+docker stop 4ff5238b9464ed7050b89ef137e1b86bbf27c21aa74d5b62090f8fc3e86b4d17
+docker rm 4ff5238b9464ed7050b89ef137e1b86bbf27c21aa74d5b62090f8fc3e86b4d17
+docker run --detach --env MYSQL_ROOT_PASSWORD=dummypassword --env MYSQL_USER=todos-user --env MYSQL_PASSWORD=dummytodos --env MYSQL_DATABASE=todos --name mysql --publish 3306:3306 mysql:5.7
+docker run --name todos-api --publish 5000:5000 --link mysql:mysql in28min/todo-rest-api-mysql:1.0.0.RELEASE
+
+docker-compose --version
+docker container ls
+docker container stop f25f59ebec84
+docker container rm f25f59ebec84
+docker-compose up
+
+az group delete --name hello-world-rest-api-rg
+az webapp restart -name hello-world-rest-api-in28minutes --resource-group hello-world-rest-api-rg
+az provider list
+az group delete --name container-resource-group --yes
+az group delete --name hello-world-rest-api-rg
+
+cd /in28Minutes/git/hello-world-rest-api-azure-pipelines 
+git init
+git add *
+git status
+git commit -m "first commit"
+git remote add origin https://github.com/in28minutes/hello-world-rest-api-azure-pipelines.git
+git push -u origin master
+
+
+git status
+git add *
+git commit -m "V10 change"
+git push -u origin master
+
+password - password@123
+
+PRODUCTION - v1
+DATABASE_URL -> PROD_URL Deployment Slot Setting
+
+STAGE - V2
+DATABASE_URL -> STAGE_URL Deployment Slot Setting
+NEW_SETTING 
