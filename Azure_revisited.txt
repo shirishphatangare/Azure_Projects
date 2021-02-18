@@ -1,0 +1,371 @@
+A) Azure Functions - Http Trigger
+
+Azure functions are Event-Driven, serverless and can send output to other Azure Services. 
+Triggers for Azure functions can be HTTP, Timed events, Blob triggers, Queue triggers or events from other Azure services.
+When working with Azure funcions or any of the Azure services, Microsoft Visual Studio is the best IDE.
+
+1) Create your first Azure function with Java and Eclipse. Followed steps in below link
+https://docs.microsoft.com/en-us/azure/azure-functions/functions-create-maven-eclipse
+2) Azure Functions Core Tools, version 2 must be installed to run and debug functions locally.
+https://docs.microsoft.com/en-us/azure/azure-functions/functions-run-local?tabs=windows%2Ccsharp%2Cbash#v2
+
+
+ <functionAppName>$(artifactId)</functionAppName>
+ 
+ $(artifactid)05523a is not a valid storage account name. Storage account name must be between 3 and 24 characters in length and use numbers and lower-case letters only.
+
+
+<functionAppName>azurefunctionhttp</functionAppName>
+
+<configuration>
+   <!-- function app name -->
+   <appName>${functionAppName}</appName>
+.....
+
+3) Getting started with Spring Cloud Function in Azure - sample Spring boot application with Azure Function and Http Trigger
+https://docs.microsoft.com/en-us/azure/developer/java/spring-framework/getting-started-with-spring-cloud-function-in-azure
+
+
+4) Create a Java function in Azure from the command line
+https://docs.microsoft.com/en-us/azure/azure-functions/create-first-function-cli-java?tabs=bash%2Cazure-cli%2Cbrowser
+
+Got below errors while deploying Azure function on cloud. Take care of host name and storage account name.
+Changed artifact id to azurehttp and function name in pom.xml to azurehttp1 and it deployed successfully.
+
+[ERROR] Failed to execute goal com.microsoft.azure:azure-functions-maven-plugin:1.9.1:deploy (default-cli) on project azure-http: The host name azure.http-20210211152424899.azurewebsites.net is invalid. OnError while emitting onNext value: retrofit2.Response.class
+
+[ERROR] Failed to execute goal com.microsoft.azure:azure-functions-maven-plugin:1.9.1:deploy (default-cli) on project azure-http: azure.http1af605886 is not a valid storage account name. Storage account name must be between 3 and 24 characters in length and use numbers and lower-case letters only. OnError while emitting onNext value: retrofit2.Response.class
+
+5) Useful Maven commands
+
+mvn clean test
+mvn clean install or mvn package
+mvn azure-functions:run - To run locally and test before deployment
+
+Need to login using "az login" before deployment to Azure Cloud
+mvn azure-functions:deploy - To deploy to Azure Cloud
+
+Create azure-functions-archetyp project from Maven command line
+mvn archetype:generate -DarchetypeGroupId=com.microsoft.azure -DarchetypeArtifactId=azure-functions-archetype -DjavaVersion=11
+
+With trigger property, a sample Blob Trigger Azure Function is created.
+mvn archetype:generate -DarchetypeGroupId=com.microsoft.azure -DarchetypeArtifactId=azure-functions-archetype -DjavaVersion=11 -Dtrigger=BlobTrigger
+
+6) The local.settings.json file stores app settings, connection strings, and settings used by local development tools. Settings in the local.settings.json file are used only when you're running projects locally.
+
+7) The host.json metadata file contains global configuration options that affect all functions for a function app.
+
+---------------------------------------
+
+B) Azure Functions Integration with Azure Blob storage 
+
+1) Azure Functions integrate with Azure Storage via triggers and bindings. Integrating with Blob storage allows you to build functions that react to changes in blob data as well as read/write values from/to Blob storage.
+
+	         Action									     Type
+Run a function as blob storage data changes				Trigger
+Read blob storage data in a function					Input binding
+Allow a function to write blob storage data				Output binding
+
+2) Azure Blob storage trigger for Azure Functions
+
+cd to directory containing maven project and run 'mvn azure-functions:add' which allows you to quickly add a function or java class of the expected trigger type
+in an exisiting project (javaazurefunctionhttp).
+
+C:\Java_Projects>cd javaazurefunctionhttp
+C:\Java_Projects\javaazurefunctionhttp>mvn azure-functions:add
+ 
+[INFO] Step 1 of 4: Load all function templates
+[INFO] Successfully loaded all function templates
+[INFO]
+[INFO] Step 2 of 4: Select function template
+Choose from below options as template for new function
+0. HttpTrigger
+1. BlobTrigger
+2. QueueTrigger
+3. TimerTrigger
+4. EventGridTrigger
+5. EventHubTrigger
+6. CosmosDBTrigger
+7. ServiceBusQueueTrigger
+8. ServiceBusTopicTrigger
+Enter index to use: 1
+[INFO] Selected function template: BlobTrigger
+[INFO] Successfully found function template: BlobTrigger
+[INFO]
+[INFO] Step 3 of 4: Prepare required parameters
+[INFO] Common parameter [Function Name]: name for both the new function and Java class
+Enter value for Function Name: BlobExample
+[INFO] Common parameter [Package Name]: package name of the new Java class
+Enter value for Package Name: com.samples
+[INFO] Trigger specific parameter [connection]:The name of the app setting containing your storage account connection string.
+Enter value for connection:
+[WARNING] Invalid input, please check and try again.
+Enter value for connection: MyStorageAccountAppSetting
+[INFO] Trigger specific parameter [path]:The path within your storage account that the trigger will monitor.
+Enter value for path(Default: mycontainer): myblob
+[INFO]
+[INFO] Summary of parameters for function template:
+[INFO] path: myblob/filenameblob
+[INFO] functionName: BlobExample
+[INFO] className: BlobExample
+[INFO] connection: MyStorageAccountAppSetting
+[INFO] packageName: com.samples
+[INFO]
+[INFO] Step 4 of 4: Saving function to file
+[INFO] Successfully saved new function at C:\Java_Projects\javaazurefunctionhttp\src\main\java\com\samples\BlobExample.java
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESS
+[INFO] ------------------------------------------------------------------------
+
+After this step, the default java blob triggered function will be automatically set up.
+
+Then build your maven project and deploy it to azure.
+mvn clean install or mvn package
+
+Need to login using "az login" before deployment to Azure Cloud
+mvn azure-functions:deploy - To deploy to Azure Cloud
+
+3) In connection property you need to provide the name of the app setting containing your storage account connection String.
+By default, a storage account is created when an azure function is deployed. Configuration of function app has a property named 'AzureWebJobsStorage' which has
+the connection string for the default storage account.
+Hence "connection": "AzureWebJobsStorage" worked perfectly fine and logs were updated when a file was uploaded to container myblob.
+
+{
+  "scriptFile": "../javaazurefunctionblob-0.1.jar",
+  "entryPoint": "com.samples.BlobExample.run",
+  "bindings": [
+    {
+      "type": "blobTrigger",
+      "direction": "in",
+      "name": "content",
+      "path": "myblob/{name}",
+      "dataType": "binary",
+      "connection": "AzureWebJobsStorage"
+    }
+  ]
+}
+
+on success below logs were displayed
+
+2021-02-15T05:28:24.585 [Information] Executing 'Functions.BlobExample' (Reason='New blob detected: myblob/soap.txt', Id=88b66eee-b010-48dc-9e43-fbb94b1a8de1)
+2021-02-15T05:28:24.585 [Information] Trigger Details: MessageId: c0f9173f-0755-49b6-b5fa-1988e1b60291, DequeueCount: 1, InsertionTime: 2021-02-15T05:28:24.000+00:00, BlobCreated: 2021-02-15T05:28:15.000+00:00, BlobLastModified: 2021-02-15T05:28:15.000+00:00
+2021-02-15T05:28:24.626 [Information] Java Blob trigger function processed a blob. Name: soap.txtSize: 1138 Bytes
+2021-02-15T05:28:24.642 [Information] Function "BlobExample" (Id: 88b66eee-b010-48dc-9e43-fbb94b1a8de1) invoked by Java Worker
+2021-02-15T05:28:24.642 [Information] Executed 'Functions.BlobExample' (Succeeded, Id=88b66eee-b010-48dc-9e43-fbb94b1a8de1, Duration=66ms)
+
+4) We use Function app to group functions together as a logical unit for easier management. 
+
+Azure Functions good practices --
+
+a) Should do one thing (NanoService).
+b) Should be quick.
+c) Should be Stateless.
+
+Useful link - https://docs.microsoft.com/en-us/azure/azure-functions/functions-reference-java?tabs=bash%2Cconsumption#environment-variables
+
+------------------------
+
+Azure APIM (API Management)
+
+1) HTTP I/P --> Azure APIM --> HTTP O/P --> Spring Boot REST API or Azure Function. APIM acts a proxy (Forward proxy + Reverse Proxy).
+2) Azure APIM is a powerful facade for backend API. Change the whole API app to feel, look and behave differently.
+3) Point of access to external world. Expose all API behind one IP.
+4) Custom domain is supported. 
+5) We can defined API management policies that will be applied to incoming HTTP I/P and converted to HTTP O/P before sending to actual backend API.
+6) Inbound processing policies - Modify the request before sending to backend API.
+7) Outbound processing policies - Modify the response before sending to the client.
+8) We can define auto-scaling rules in APIM.
+9) SKU is short for 'Stock-keeping-Unit'. It basically stands for an item which is on sale, in lamen language. In terms of the Microsoft Azure cloud, they basically signify a purchasable SKU under a product. For example, Basic/Premium/Standard SKU.
+10) We can use Azure Front Door or Traffic Manager in front of APIM.
+11) APIM is nothing but a API Gateway pattern. APIM is a best palce to define Cross-cutting concerns like Routing, Authentication, Logging, Caching, Retry/Circuit Breaker etc.
+12) Policy scopes for APIM from Higher to Lower scope - Global, Product (set of APIs), API (Set of Operations) and Operation.
+13) Leaverage the API gateway pattern with APIM - Cross-cutting concerns, Route requests to backend services, Insulate client from internal refactoring.
+ 
+
+Deploy a Spring boot Azure function 'springazurefunctionhttp' to Cloud and wrap it with APIM Service --
+
+a) Create API Management 'apimspringazurefunctionapp' under API Management Services. APIM deployment takes considerable amount of time.
+b) APIs --> Add a new API. Import deployed Function app to the APIM Service. Complete function app with selected APIs can be imported to APIM.
+c) We can test API and create new revisions. Base URL will be like- https://apimspringazurefunctionapp.azure-api.net
+d) Add Inbound Policy 'Limit Call Rate' to GET /hello API on Revision 2. 
+e) Secure API with subscription key and test it inside Azure Portal and from Postman.
+f) External link - https://apimspringazurefunctionapp.azure-api.net/my-spring-azure-function-http/hello
+g) When rate limit exceeded you will get error - HTTP/1.1 429 Too Many Requests
+h) When testing from an external client like Postman, we need to provide subscription key as Header. You can get subscription key from HTTP Request under Test tab of APIM like -  Ocp-Apim-Subscription-Key: b888ea62e8fe48128074a551d4425b93
+
+---------------------------------
+
+Azure App Configuration 
+
+Create Spring Boot App with Azure App Configuration
+
+14) Azure App Configuration provides a service to centrally manage application settings and feature flags.
+15) Modern programs, especially programs running in a cloud, generally have many components that are distributed in nature. Spreading configuration settings across these components can lead to hard-to-troubleshoot errors during an application deployment. Use App Configuration to store all the settings for your application and secure their accesses in one place.
+16) App Configuration complements Azure Key Vault, which is used to store application secrets.
+17) The easiest way to add an App Configuration store to your application is through a client library provided by Microsoft. 
+Java Spring --	App Configuration client for Spring Cloud
+
+a) Create an App Configuration store
+
+1) Search App Configuration and create a new App Configuration
+2) Created a new App Configuration with resource name 'mytestspringappconfig'
+3) After the deployment finishes, navigate to the App Configuration resource. Select Settings > Access keys. Make a note of the primary read-only key connection string. You'll use this connection string later to configure your application to communicate with the App Configuration store that you created.
+4) Select Configuration Explorer -> + Create -> Key-value to add the following key-value pairs.
+key --> /application/config.message and value --> Live Happy Forever!
+5) Set an environment variable named APP_CONFIGURATION_CONNECTION_STRING, and set it to the access key to your App Configuration store.
+
+Endpoint=https://myspringhelloworldappconfig.azconfig.io;Id=yWBN-l1-s0:dWOsBukyZBNaVd86DItn;Secret=kFcnBYhdrVMocUcEdOPNMEy7CeLP7Ro/dsaeilg25gE=
+
+Windows cmd - (Since we are deploying from cmd prompt)
+
+setx APP_CONFIGURATION_CONNECTION_STRING Endpoint=https://myspringhelloworldappconfig.azconfig.io;Id=yWBN-l1-s0:dWOsBukyZBNaVd86DItn;Secret=kFcnBYhdrVMocUcEdOPNMEy7CeLP7Ro/dsaeilg25gE=
+
+Macos or Linux
+
+export APP_CONFIGURATION_CONNECTION_STRING=Endpoint=https://mytestspringappconfig.azconfig.io;Id=IbgD-l1-s0:7GKRoz0mIyC2d+S0PUNB;Secret=Zd6ySMp+y7LJ59ynPkti/SPwewG18yrSFb03tAGY3cU=
+
+Build your Spring Boot application with Maven and run it
+
+mvn clean package
+mvn spring-boot:run
+
+Running link - http://localhost:8080/ on browser displayed - Message: Live Happy Forever!
+
+Deploy this Spring boot web app to Cloud using - mvn azure-webapp:deploy
+
+Successfully deployed the artifact to https://hello-world-rest-api-shirish-1806.azurewebsites.net
+
+Remember to update environment variable "APP_CONFIGURATION_CONNECTION_STRING" as an env var for deployed app under App Service --> Configuration --> App setting
+
+Running link - https://hello-world-rest-api-shirish-1806.azurewebsites.net/ on browser displayed - Message: Live Happy Forever!
+
+-----
+
+Useful links - 
+
+https://docs.microsoft.com/en-us/azure/azure-app-configuration/quickstart-java-spring-app
+
+Function App --> Configuration --> App setting, Connection Setting, Function Runtime Setting, General Setting
+
+In Functions, app settings, such as service connection strings, are exposed as environment variables during execution. You can access these settings by using, System.getenv("AzureWebJobsStorage").
+
+The following example gets the application setting, with the key named myAppSetting:
+
+public class Function {
+    public String echo(@HttpTrigger(name = "req", methods = {HttpMethod.POST}, authLevel = AuthorizationLevel.ANONYMOUS) String req, ExecutionContext context) {
+        context.getLogger().info("My app setting value: "+ System.getenv("myAppSetting"));
+        return String.format(req);
+    }
+}
+
+I think Azure functions are supposed to use App setting service since they are cohesive (do one thing as a NanoService) and not disributed in nature. However, Spring Boot applications use App Configuration Service. That is why we are using a Spring Boot example for Azure App Configuration 
+
+------
+
+Azure App Service WebJobs
+
+1) Run background tasks with WebJobs in Azure App Service.
+2) WebJobs is a feature of Azure App Service that enables you to run a program or script in the same instance as a web app, API app, or mobile app. There is no additional cost to use WebJobs.
+3) Azure Functions provides another way to run programs and scripts. However, Azure Functions offers more developer productivity than Azure App Service WebJobs does. It also offers more options for programming languages, development environments, Azure service integration, and pricing. For most scenarios, it's the best choice.
+4) Supported file types for scripts or programs --
+
+.cmd, .bat, .exe (using Windows cmd)
+.ps1 (using PowerShell)
+.sh (using Bash)
+.php (using PHP)
+.py (using Python)
+.js (using Node.js)
+.jar (using Java)
+
+5) A WebJob can be continuous or triggered. 
+Continuous -- Starts immediately when the WebJob is created. To keep the job from ending, the program or script typically does its work inside an endless loop. If the job does end, you can restart it.
+Triggered -- Starts only when triggered manually or on a schedule.
+
+6) We will try to deploy a scheduled WebJob by using the Azure portal to upload an executable or script. 
+
+a) Created a simple batch script executing a jar file to print a name 10 times.
+b) In the Azure portal, go to the App Service page of your App Service web app, API app, or mobile app.
+c) Select WebJobs and Add a webjob by giving all the details. Triggered --> Scheduled --> CRON expression (run every 20 secs)
+d) Once webjob runs as per the given schdule, you can see history. Select the WebJob you want to see history for, and then select the Logs button from top.
+e) In the WebJob Details page, select a time to see details for one run.
+f) In the WebJob Run Details page, select Toggle Output to see the text of the log contents.
+g) Got error - "Webjob has been compiled by a more recent version of the Java Runtime", since I used Java 11 for compilation and App service Runtime is Java 8.
+
+Useful commands --
+
+Compile Java file
+c:\Java_Projects\Azure-webjob-in-java\src>"C:\Program Files\Java\jdk1.8.0_231\bin\javac" Webjob.java
+
+Create jar from class file
+c:\Java_Projects\Azure-webjob-in-java\src>"C:\Program Files\Java\jdk1.8.0_231\bin\jar" -cf Webjob.jar Webjob.class
+
+Windows batch script contents
+
+@ECHO OFF
+java -cp Webjob.jar Webjob
+ECHO Congratulations! Your first webjob script executed successfully.
+
+7) The Azure WebJobs SDK can be used with WebJobs to simplify many programming tasks.  The SDK integrates Microsoft Azure Storage, triggering a function in your program when items are added to Queues, Blobs, or Tables.
+
+----
+
+Azure Service Bus
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
